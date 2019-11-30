@@ -1,4 +1,18 @@
-(function(root) {
+(function (root, factory) {
+  'use strict';
+
+  if (typeof exports !== 'undefined' && typeof require !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = factory(require('FFT'));
+    }
+    exports.Spectrogram = factory(require('FFT'));
+  } else if (typeof define === 'function' && define.amd) {
+    define(['FFT'], factory);
+  } else {
+    root.Spectrogram = factory(root.FFT);
+  }
+
+})(this, function (FFT) {
   'use strict';
 
   function _isFunction(v) {
@@ -264,17 +278,5 @@
     return color;
   };
 
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = Spectrogram;
-    }
-    exports.Spectrogram = Spectrogram;
-  } else if (typeof define === 'function' && define.amd) {
-    define([], function() {
-      return Spectrogram;
-    });
-  } else {
-    root.Spectrogram = Spectrogram;
-  }
-
-})(this);
+  return Spectrogram;
+});
