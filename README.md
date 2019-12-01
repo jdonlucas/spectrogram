@@ -35,11 +35,7 @@ Take a look at the [full example](example/).
 ```javascript
 var spectrogram = require('spectrogram');
 
-var spectro = Spectrogram(document.getElementById('canvas'), {
-  audio: {
-    enable: false
-  }
-});
+var spectro = Spectrogram(document.getElementById('canvas'), {});
 
 var audioContext = new AudioContext();
 var request = new XMLHttpRequest();
@@ -48,35 +44,11 @@ request.responseType = 'arraybuffer';
 
 request.onload = function() {
   audioContext.decodeAudioData(request.response, function(buffer) {
-    spectro.connectSource(buffer, audioContext);
-    spectro.start();
+    spectro.draw(buffer);
   });
 };
 
 request.send();
-```
-
-##### Live input stream with [getUserMedia](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getUserMedia).
-
-```javascript
-navigator.getUserMedia({
-  video: false,
-  audio: true
-},
-function(stream) {
-  var input = audioContext.createMediaStreamSource(stream);
-  var analyser = audioContext.createAnalyser();
-
-  analyser.smoothingTimeConstant = 0;
-  analyser.fftSize = 2048;
-
-  input.connect(analyser);
-
-  spectro.connectSource(analyser, audioContext);
-  spectro.start();
-}, function(error) {
-
-});
 ```
 
 ### Custom color spectrum
@@ -86,7 +58,6 @@ By default the colors are grayscale. You can generate a custom color spectrum us
 ```javascript
 var spectro = Spectrogram(..., {
   canvas: ...
-  audio: ...
   colors: function(steps) {
     var baseColors = [[0,0,255,1], [0,255,255,1], [0,255,0,1], [255,255,0,1], [ 255,0,0,1]];
     var positions = [0, 0.15, 0.30, 0.50, 0.75];

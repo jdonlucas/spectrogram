@@ -5,7 +5,6 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 
 var audioContext;
 var spectro;
-var microphoneButton;
 var songButton;
 var songSelect;
 var selectedMedia;
@@ -28,9 +27,6 @@ function init() {
         return window.innerWidth;
       },
       height: 500
-    },
-    audio: {
-      enable: true
     },
     colors: function(steps) {
       var baseColors = [[0,0,255,1], [0,255,255,1], [0,255,0,1], [255,255,0,1], [ 255,0,0,1]];
@@ -56,13 +52,9 @@ function init() {
     alert('No web audio support in this browser!');
   }
 
-  microphoneButton = document.getElementById('btn-microphone');
   songButton = document.getElementById('btn-song');
   songSelect = document.getElementById('select-song');
 
-  microphoneButton.disabled = false;
-
-  microphoneButton.addEventListener('click', requestMic, false);
   songButton.addEventListener('click', playSong, false);
   songSelect.addEventListener('change', selectMedia, false);
 
@@ -95,46 +87,15 @@ function selectMedia() {
 
 function playSong() {
   loadMedia(selectedMedia, function(songBuffer) {
-    spectro.connectSource(songBuffer, audioContext);
-    spectro.start();
+    spectro.draw(songBuffer, audioContext);
   });
 
   removeControls();
 }
 
-function requestMic() {
-  navigator.getUserMedia({
-    video: false,
-    audio: true
-  },
-  function(stream) {
-    handleMicStream(stream);
-    removeControls();
-  }, handleMicError);
-}
-
-function handleMicStream(stream) {
-  var input = audioContext.createMediaStreamSource(stream);
-  var analyser = audioContext.createAnalyser();
-
-  analyser.smoothingTimeConstant = 0;
-  analyser.fftSize = 2048;
-
-  input.connect(analyser);
-
-  spectro.connectSource(analyser, audioContext);
-  spectro.start();
-}
-
-function handleMicError(error) {
-  alert(error);
-  console.log(error);
-}
-
 function removeControls() {
   songSelect.parentNode.removeChild(songSelect);
   songButton.parentNode.removeChild(songButton);
-  microphoneButton.parentNode.removeChild(microphoneButton);
 }
 
 window.addEventListener('load', init, false);
