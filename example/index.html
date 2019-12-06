@@ -11,13 +11,14 @@
   <canvas id="canvas"></canvas>
   <div>
     <select id="select-song">
+      <option value="2">demo.wav</option>
       <option value="1">Ethos - Final Hope</option>
       <option value="0">Aphex Twins - Equation</option>
     </select>
-    <button id="btn-song" disabled="disabled">Play song</button>
+    <button id="btn-song">Play song</button>
+    <button id="btn-draw">Draw song's spectro</button>
   </div>
 
-  <script src="scripts/audiobuffer-slice.js"></script>
   <script src="scripts/vendor/chroma.js"></script>
   <script src="../FFT.js"></script>
   <script src="../spectrogram.js"></script>
