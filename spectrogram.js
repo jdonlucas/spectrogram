@@ -57,6 +57,10 @@
     var fft = new FFT(buffer);
     var channelData = buffer.getChannelData(0);
     var currentOffset = 0;
+    var canvasContext = this._audioBuffer.canvasContext;
+    var canvas = canvasContext.canvas;
+    var width = canvas.width;
+    var height = canvas.height;
     while (currentOffset + this._FFT_SIZE < channelData.length) {
       var segment = channelData.slice(
         currentOffset,
@@ -64,37 +68,21 @@
       );
       var spectrum = fft.calculateSpectrum(segment);
       var array = new Uint8Array(this._FFT_SIZE / 2);
-      var j;
-      for (j = 0; j < this._FFT_SIZE / 2; j++) {
+      for (var j = 0; j < this._FFT_SIZE / 2; j++) {
         array[j] = Math.max(-255, (Math.log(spectrum[j]) * Math.LOG10E) * 45);
       }
-      // this._drawStream(array, this._audioBuffer.canvasContext);
+      var segmentNumber = (currentOffset + this._FFT_SIZE) / this._FFT_SIZE;
+      if (segmentNumber > width) {
+        break;
+      }
+      for (var frequencyNumber = 0; frequencyNumber < array.length; frequencyNumber++) {
+        var value = array[frequencyNumber];
+        canvasContext.fillStyle = this._getColor(value);
+        canvasContext.fillRect(segmentNumber, height - frequencyNumber, 1, 1);
+      }
+      this._baseCanvasContext.drawImage(canvas, 0, 0, width, height);
       currentOffset += this._FFT_SIZE;
     }
-  };
-
-  Spectrogram.prototype._drawStream = function (array, canvasContext) {
-    var canvas = canvasContext.canvas;
-    var width = canvas.width;
-    var height = canvas.height;
-    var tempCanvasContext = canvasContext._tempContext;
-    var tempCanvas = tempCanvasContext.canvas;
-    tempCanvasContext.drawImage(canvas, 0, 0, width, height);
-
-    for (var i = 0; i < array.length; i++) {
-      var value = array[i];
-      canvasContext.fillStyle = this._getColor(value);
-      canvasContext.fillRect(width - 1, height - i, 1, 1);
-    }
-
-    canvasContext.translate(-1, 0);
-    // draw prev canvas before translation
-    canvasContext.drawImage(tempCanvas, 0, 0, width, height, 0, 0, width, height);
-    canvasContext.drawImage(tempCanvas, 0, 0, width, height, 0, 0, width, height);
-    // reset transformation matrix
-    canvasContext.setTransform(1, 0, 0, 1, 0, 0);
-
-    this._baseCanvasContext.drawImage(canvas, 0, 0, width, height);
   };
 
   Spectrogram.prototype.draw = function (audioBuffer) {

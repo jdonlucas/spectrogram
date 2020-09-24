@@ -11,7 +11,7 @@ var selectedMedia;
 var media = [
   'media/aphex_twins_equation.mp3',
   'media/ethos_final_hope.mp3',
-  'media/demo.wav'
+  'media/demo.wav' //demo audio from wavesurfer.js
 ];
 
 function init() {
