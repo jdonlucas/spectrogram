@@ -99,12 +99,6 @@
       canvas.width = this._baseCanvas.width;
       canvas.height = this._baseCanvas.height;
       canvasContext = canvas.getContext('2d');
-
-      var tempCanvas = document.createElement('canvas');
-      tempCanvas.width = canvas.width;
-      tempCanvas.height = canvas.height;
-
-      canvasContext._tempContext = tempCanvas.getContext('2d');
     }
 
     source = {
@@ -120,7 +114,6 @@
     canvasContext = canvasContext || this._audioBuffer.canvasContext;
     var canvas = canvasContext.canvas;
     canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-    canvasContext._tempContext.clearRect(0, 0, canvas.width, canvas.height);
     this._baseCanvasContext.clearRect(0, 0, canvas.width, canvas.height);
   };
 
