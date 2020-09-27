@@ -25,9 +25,9 @@
 
   var toString = Object.prototype.toString;
 
-  function Spectrogram(canvas, options) {
+  function Spectrogram(canvas, audioContext, options) {
     if (!(this instanceof Spectrogram)) {
-      return new Spectrogram(canvas, options);
+      return new Spectrogram(canvas, audioContext, options);
     }
 
     var baseCanvasOptions = options.canvas || {};
@@ -35,6 +35,9 @@
     this._baseCanvasContext = this._baseCanvas.getContext('2d');
     this._baseCanvas.width = _result(baseCanvasOptions.width) || this._baseCanvas.width;
     this._baseCanvas.height = _result(baseCanvasOptions.height) || this._baseCanvas.height;
+    this._layers = {
+      drawOrder: []
+    };
 
     var colors;
     if (typeof options.colors === 'function') {
@@ -44,7 +47,9 @@
     }
     this._colors = colors;
 
-    this._audio = {};
+    this._audio = {
+      context: audioContext
+    };
     this._FFT_SIZE = 1024;
   }
 
@@ -70,12 +75,12 @@
       }
       for (var frequencyNumber = 0; frequencyNumber < array.length; frequencyNumber++) {
         var value = array[frequencyNumber];
-        this._audio.spectroLayer.fillStyle = this._getColor(value);
-        this._audio.spectroLayer.fillRect(segmentNumber, height - frequencyNumber, 1, 1);
+        this._layers.spectro.fillStyle = this._getColor(value);
+        this._layers.spectro.fillRect(segmentNumber, height - frequencyNumber, 1, 1);
       }
-      this._baseCanvasContext.drawImage(this._audio.spectroLayer.canvas, 0, 0, width, height);
       currentOffset += this._FFT_SIZE;
     }
+    this._drawLayers();
   };
 
   Spectrogram.prototype.draw = function (audioBuffer) {
@@ -84,22 +89,59 @@
     }
 
     this._audio.buffer = audioBuffer
-    if (!this._audio.spectroLayer) {
-      var canvas = document.createElement('canvas');
-      canvas.width = this._baseCanvas.width;
-      canvas.height = this._baseCanvas.height;
-      this._audio.spectroLayer = canvas.getContext('2d');
-    }
-    this.clear(this._audio.spectroLayer);
-    this._audio.spectroLayer.fillStyle = this._getColor(0);
-    this._audio.spectroLayer.fillRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
+    this._layers.spectro = this._layers.spectro || this.initializeLayer();
+    this._layers.drawOrder[0] = this._layers.spectro;
+    this.clear(this._layers.spectro);
+    this._layers.spectro.fillStyle = this._getColor(0);
+    this._layers.spectro.fillRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
 
     this._draw();
+  };
+
+  Spectrogram.prototype.drawPlayhead = function () {
+    this._layers.playhead = this.initializeLayer();
+    this._layers.drawOrder[1] = this._layers.playhead;
+    this._layers.playhead.requestId = requestAnimationFrame(this._drawPayhead.bind(this));
+  };
+
+  Spectrogram.prototype._drawPayhead = function () {
+    this.clear(this._layers.playhead);
+    this._layers.playhead.fillStyle = "yellow";
+    this._layers.playhead.fillRect(this._getXPositionOfPlayhead(), 0, 1, this._baseCanvas.height);
+    this._drawLayers();
+    this._layers.playhead.requestId = requestAnimationFrame(this._drawPayhead.bind(this));
+  }
+
+  Spectrogram.prototype._getXPositionOfPlayhead = function () {
+    var channelDataIndex = this._audio.context.currentTime * this._audio.buffer.sampleRate;
+    return Math.floor(channelDataIndex / this._FFT_SIZE);
+  }
+
+  Spectrogram.prototype.stopDrawingPlayhead = function () {
+    cancelAnimationFrame(this._layers.playhead.requestId);
+    delete this._layers.playhead;
+    this._layers.drawOrder.splice(1,1);
+    this._drawLayers();
   };
 
   Spectrogram.prototype.clear = function (canvasContext) {
     canvasContext = canvasContext || this._baseCanvasContext;
     canvasContext.clearRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
+  };
+
+  Spectrogram.prototype.initializeLayer = function () {
+    var canvas = document.createElement('canvas');
+    canvas.width = this._baseCanvas.width;
+    canvas.height = this._baseCanvas.height;
+    return canvas.getContext('2d');
+  };
+
+  Spectrogram.prototype._drawLayers = function () {
+    var baseCanvasContext = this._baseCanvasContext;
+    var baseCanvas = this._baseCanvas;
+    this._layers.drawOrder.forEach(function (layer) {
+      baseCanvasContext.drawImage(layer.canvas, 0, 0, baseCanvas.width, baseCanvas.height);
+    })
   };
 
   Spectrogram.prototype._generateDefaultColors = function (steps) {

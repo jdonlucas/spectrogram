@@ -15,7 +15,13 @@ var media = [
 ];
 
 function init() {
-  spectro = Spectrogram(document.getElementById('canvas'), {
+  try {
+    audioContext = new AudioContext();
+  } catch (e) {
+    alert('No web audio support in this browser!');
+  }
+
+  spectro = Spectrogram(document.getElementById('canvas'), audioContext, {
     canvas: {
       width: function() {
         return window.innerWidth;
@@ -40,12 +46,6 @@ function init() {
     }
   });
 
-  try {
-    audioContext = new AudioContext();
-  } catch (e) {
-    alert('No web audio support in this browser!');
-  }
-
   songButton = document.getElementById('btn-song');
   drawButton = document.getElementById('btn-draw');
   songSelect = document.getElementById('select-song');
@@ -69,10 +69,12 @@ function playSong() {
       source.buffer = songBuffer;
       source.connect(audioContext.destination);
       source.start();
+      spectro.drawPlayhead();
     })
   } else {
     songButton.textContent = "Play song";
     source.stop()
+    spectro.stopDrawingPlayhead();
   }
 }
 
