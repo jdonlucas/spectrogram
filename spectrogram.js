@@ -53,6 +53,39 @@
     this._FFT_SIZE = 1024;
   }
 
+  Spectrogram.prototype.draw = function (audioBuffer) {
+    if (toString.call(audioBuffer) !== '[object AudioBuffer]') {
+      throw 'audioBuffer is not of type AudioBuffer'
+    }
+
+    this._audio.buffer = audioBuffer
+    this._layers.spectro = this._layers.spectro || this._initializeLayer();
+    this._layers.drawOrder[0] = this._layers.spectro;
+    this.clear(this._layers.spectro);
+    this._layers.spectro.fillStyle = this._getColor(0);
+    this._layers.spectro.fillRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
+
+    this._draw();
+  };
+
+  Spectrogram.prototype.drawPlayhead = function () {
+    this._layers.playhead = this._initializeLayer();
+    this._layers.drawOrder[1] = this._layers.playhead;
+    this._layers.playhead.requestId = requestAnimationFrame(this._drawPayhead.bind(this));
+  };
+
+  Spectrogram.prototype.stopDrawingPlayhead = function () {
+    cancelAnimationFrame(this._layers.playhead.requestId);
+    delete this._layers.playhead;
+    this._layers.drawOrder.splice(1,1);
+    this._drawLayers();
+  };
+
+  Spectrogram.prototype.clear = function (canvasContext) {
+    canvasContext = canvasContext || this._baseCanvasContext;
+    canvasContext.clearRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
+  };
+
   Spectrogram.prototype._draw = function () {
     var fft = new FFT(this._audio.buffer);
     var channelData = this._audio.buffer.getChannelData(0);
@@ -83,27 +116,6 @@
     this._drawLayers();
   };
 
-  Spectrogram.prototype.draw = function (audioBuffer) {
-    if (toString.call(audioBuffer) !== '[object AudioBuffer]') {
-      throw 'audioBuffer is not of type AudioBuffer'
-    }
-
-    this._audio.buffer = audioBuffer
-    this._layers.spectro = this._layers.spectro || this.initializeLayer();
-    this._layers.drawOrder[0] = this._layers.spectro;
-    this.clear(this._layers.spectro);
-    this._layers.spectro.fillStyle = this._getColor(0);
-    this._layers.spectro.fillRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
-
-    this._draw();
-  };
-
-  Spectrogram.prototype.drawPlayhead = function () {
-    this._layers.playhead = this.initializeLayer();
-    this._layers.drawOrder[1] = this._layers.playhead;
-    this._layers.playhead.requestId = requestAnimationFrame(this._drawPayhead.bind(this));
-  };
-
   Spectrogram.prototype._drawPayhead = function () {
     this.clear(this._layers.playhead);
     this._layers.playhead.fillStyle = "yellow";
@@ -117,19 +129,7 @@
     return Math.floor(channelDataIndex / this._FFT_SIZE);
   }
 
-  Spectrogram.prototype.stopDrawingPlayhead = function () {
-    cancelAnimationFrame(this._layers.playhead.requestId);
-    delete this._layers.playhead;
-    this._layers.drawOrder.splice(1,1);
-    this._drawLayers();
-  };
-
-  Spectrogram.prototype.clear = function (canvasContext) {
-    canvasContext = canvasContext || this._baseCanvasContext;
-    canvasContext.clearRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
-  };
-
-  Spectrogram.prototype.initializeLayer = function () {
+  Spectrogram.prototype._initializeLayer = function () {
     var canvas = document.createElement('canvas');
     canvas.width = this._baseCanvas.width;
     canvas.height = this._baseCanvas.height;
