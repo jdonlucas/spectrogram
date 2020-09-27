@@ -78,7 +78,8 @@ function playSong() {
 
 function drawSong() {
   fetchMedia(function drawSong(songBuffer) {
-    spectro.draw(songBuffer, audioContext);
+    spectro.clear();
+    spectro.draw(songBuffer);
   });
 }
 
