@@ -1,14 +1,16 @@
+import {Spectrogram} from '../../spectrogram.js';
+
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
-var audioContext;
-var source;
-var spectro;
-var songButton;
-var drawButton;
-var songSelect;
-var selectedMedia;
+let audioContext;
+let source;
+let spectro;
+let songButton;
+let drawButton;
+let songSelect;
+let selectedMedia;
 
-var media = [
+const media = [
   'media/aphex_twins_equation.mp3',
   'media/ethos_final_hope.mp3',
   'media/demo.wav' //demo audio from wavesurfer.js
@@ -21,7 +23,7 @@ function init() {
     alert('No web audio support in this browser!');
   }
 
-  spectro = Spectrogram(document.getElementById('canvas'), audioContext, {
+  spectro = new Spectrogram(document.getElementById('canvas'), audioContext, {
     canvas: {
       width: function() {
         return window.innerWidth;
@@ -29,16 +31,16 @@ function init() {
       height: 500
     },
     colors: function(steps) {
-      var baseColors = [[0,0,255,1], [0,255,255,1], [0,255,0,1], [255,255,0,1], [ 255,0,0,1]];
-      var positions = [0, 0.15, 0.30, 0.50, 0.75];
+      const baseColors = [[0, 0, 255, 1], [0, 255, 255, 1], [0, 255, 0, 1], [255, 255, 0, 1], [255, 0, 0, 1]];
+      const positions = [0, 0.15, 0.30, 0.50, 0.75];
 
-      var scale = new chroma.scale(baseColors, positions)
-      .domain([0, steps]);
+      const scale = new chroma.scale(baseColors, positions)
+        .domain([0, steps]);
 
-      var colors = [];
+      const colors = [];
 
-      for (var i = 0; i < steps; ++i) {
-        var color = scale(i);
+      for (let i = 0; i < steps; ++i) {
+        const color = scale(i);
         colors.push(color.hex());
       }
 
@@ -86,7 +88,7 @@ function drawSong() {
 }
 
 function fetchMedia(callback) {
-  var request = new XMLHttpRequest();
+  const request = new XMLHttpRequest();
   request.open('GET', selectedMedia, true);
   request.responseType = 'arraybuffer';
 

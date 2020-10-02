@@ -1,11 +1,11 @@
-(function (root) {
-  'use strict';
-  /**
-   * Calculate FFT - Based on https://github.com/katspaugh/wavesurfer.js/blob/d6d4638eba7a2c08c3415d24f22259893519d604/src/plugin/FFT.js#L2
-   *                 but whittled down to just use Hann window function, which is the default for wavesurfer:
-   *                 https://github.com/katspaugh/wavesurfer.js/blob/d6d4638eba7a2c08c3415d24f22259893519d604/src/plugin/spectrogram.js#L228
-   */
-  function FFT(buffer) {
+/**
+ * Calculate FFT - Based on https://github.com/katspaugh/wavesurfer.js/blob/d6d4638eba7a2c08c3415d24f22259893519d604/src/plugin/FFT.js#L2
+ *                 but whittled down to just use Hann window function, which is the default for wavesurfer:
+ *                 https://github.com/katspaugh/wavesurfer.js/blob/d6d4638eba7a2c08c3415d24f22259893519d604/src/plugin/spectrogram.js#L228
+ */
+export class FFT {
+  constructor(buffer) {
+    let i;
     this.buffer = buffer;
     this.bufferSize = 1024;
 
@@ -22,9 +22,8 @@
         0.5 * (1 - Math.cos((Math.PI * 2 * i) / (this.bufferSize - 1)));
     }
 
-    var limit = 1;
-    var bit = this.bufferSize >> 1;
-    var i;
+    let limit = 1;
+    let bit = this.bufferSize >> 1;
 
     while (limit < this.bufferSize) {
       for (i = 0; i < limit; i++) {
@@ -40,11 +39,13 @@
       this.cosTable[i] = Math.cos(-Math.PI / i);
     }
 
-  };
+  }
 
-  FFT.prototype.calculateSpectrum = function(segment) {
+  calculateSpectrum(segment) {
+    let i;
+
     // Locally scope variables for speed up
-    var bufferSize = this.bufferSize,
+    let bufferSize = this.bufferSize,
       cosTable = this.cosTable,
       sinTable = this.sinTable,
       reverseTable = this.reverseTable,
@@ -57,7 +58,7 @@
       mag,
       spectrum = new Float32Array(bufferSize / 2);
 
-    var k = Math.floor(Math.log(bufferSize) / Math.LN2);
+    const k = Math.floor(Math.log(bufferSize) / Math.LN2);
 
     if (Math.pow(2, k) !== bufferSize) {
       throw 'Invalid buffer size, must be a power of 2.';
@@ -69,7 +70,7 @@
       this.buffer.length;
     }
 
-    var halfSize = 1,
+    let halfSize = 1,
       phaseShiftStepReal,
       phaseShiftStepImag,
       currentPhaseShiftReal,
@@ -79,7 +80,7 @@
       ti,
       tmpReal;
 
-    for (var i = 0; i < bufferSize; i++) {
+    for (i = 0; i < bufferSize; i++) {
       real[i] =
         segment[reverseTable[i]] * this.windowValues[reverseTable[i]];
       imag[i] = 0;
@@ -92,8 +93,8 @@
       currentPhaseShiftReal = 1;
       currentPhaseShiftImag = 0;
 
-      for (var fftStep = 0; fftStep < halfSize; fftStep++) {
-        var i = fftStep;
+      for (let fftStep = 0; fftStep < halfSize; fftStep++) {
+        i = fftStep;
 
         while (i < bufferSize) {
           off = i + halfSize;
@@ -124,7 +125,9 @@
       halfSize = halfSize << 1;
     }
 
-    for (var i = 0, N = bufferSize / 2; i < N; i++) {
+    i = 0;
+    const N = bufferSize / 2;
+    for (; i < N; i++) {
       rval = real[i];
       ival = imag[i];
       mag = bSi * sqrt(rval * rval + ival * ival);
@@ -135,18 +138,6 @@
       spectrum[i] = mag;
     }
     return spectrum;
-  };
-
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = FFT;
-    }
-    exports.FFT = FFT;
-  } else if (typeof define === 'function' && define.amd) {
-    define([], function() {
-      return FFT;
-    });
-  } else {
-    root.FFT = FFT;
   }
-})(this);
+}
+
