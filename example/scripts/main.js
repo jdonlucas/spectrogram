@@ -13,7 +13,8 @@ let selectedMedia;
 const media = [
   'media/aphex_twins_equation.mp3',
   'media/ethos_final_hope.mp3',
-  'media/demo.wav' //demo audio from wavesurfer.js
+  'media/demo.wav', //demo audio from wavesurfer.js
+  'https://upload.wikimedia.org/wikipedia/commons/6/6e/Scandalinbohemia_doyle_rs.ogg'
 ];
 
 function init() {
