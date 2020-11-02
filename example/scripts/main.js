@@ -10,13 +10,6 @@ let drawButton;
 let songSelect;
 let selectedMedia;
 
-const media = [
-  'media/aphex_twins_equation.mp3',
-  'media/ethos_final_hope.mp3',
-  'media/demo.wav', //demo audio from wavesurfer.js
-  'https://upload.wikimedia.org/wikipedia/commons/6/6e/Scandalinbohemia_doyle_rs.ogg'
-];
-
 function init() {
   try {
     audioContext = new AudioContext();
@@ -26,12 +19,12 @@ function init() {
 
   spectro = new Spectrogram(document.getElementById('canvas'), audioContext, {
     canvas: {
-      width: function() {
+      width: function () {
         return window.innerWidth;
       },
       height: 500
     },
-    colors: function(steps) {
+    colors: function (steps) {
       const baseColors = [[0, 0, 255, 1], [0, 255, 255, 1], [0, 255, 0, 1], [255, 255, 0, 1], [255, 0, 0, 1]];
       const positions = [0, 0.15, 0.30, 0.50, 0.75];
 
@@ -49,19 +42,14 @@ function init() {
     }
   });
 
-  songButton = document.getElementById('btn-song');
-  drawButton = document.getElementById('btn-draw');
-  songSelect = document.getElementById('select-song');
+  document.querySelectorAll("button").forEach(button => {
+    const audio = button.previousElementSibling;
+    if (!(audio instanceof HTMLAudioElement)) {
+      return;
+    }
 
-  songButton.addEventListener('click', playSong, false);
-  drawButton.addEventListener('click', drawSong, false);
-  songSelect.addEventListener('change', selectMedia, false);
-
-  selectMedia();
-}
-
-function selectMedia() {
-  selectedMedia = media[songSelect.value];
+    button.addEventListener('click', drawSong.bind(null, audio.src));
+  })
 }
 
 function playSong() {
@@ -81,23 +69,22 @@ function playSong() {
   }
 }
 
-function drawSong() {
-  fetchMedia(function drawSong(songBuffer) {
-    spectro.clear();
-    spectro.draw(songBuffer);
-  });
+async function drawSong(audioURI) {
+  const songBuffer = await fetchMedia(audioURI);
+  spectro.clear();
+  spectro.draw(songBuffer);
 }
 
-function fetchMedia(callback) {
-  const request = new XMLHttpRequest();
-  request.open('GET', selectedMedia, true);
-  request.responseType = 'arraybuffer';
+async function fetchMedia(audioURI) {
+  const response = await fetch(audioURI);
+  if (!response.ok) {
+    throw new Error("HTTP error, status = " + response.status);
+  }
 
-  request.onload = function fetchedMedia() {
-    audioContext.decodeAudioData(request.response, callback);
-  };
-
-  request.send();
+  const arrayBuffer = await response.arrayBuffer();
+  return new Promise((resolve, reject) => {
+    audioContext.decodeAudioData(arrayBuffer, resolve, reject);
+  });
 }
 
 window.addEventListener('load', init, false);
