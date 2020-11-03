@@ -48,16 +48,18 @@ export class Spectrogram {
     this._draw();
   };
 
-  drawPlayhead() {
+  drawPlayhead(audioElement) {
     this._layers.playhead = this._initializeLayer();
     this._layers.drawOrder[1] = this._layers.playhead;
-    this._layers.playhead.requestId = requestAnimationFrame(this._drawPayhead.bind(this));
+    this._audio.element = audioElement;
+    this._layers.playhead.requestId = requestAnimationFrame(this._drawPlayhead.bind(this));
   };
 
   stopDrawingPlayhead() {
     cancelAnimationFrame(this._layers.playhead.requestId);
     delete this._layers.playhead;
     this._layers.drawOrder.splice(1, 1);
+    delete this._audio.element;
     this._drawLayers();
   };
 
@@ -96,16 +98,16 @@ export class Spectrogram {
     this._drawLayers();
   };
 
-  _drawPayhead() {
+  _drawPlayhead() {
     this.clear(this._layers.playhead);
-    this._layers.playhead.fillStyle = "yellow";
+    this._layers.playhead.fillStyle = "white";
     this._layers.playhead.fillRect(this._getXPositionOfPlayhead(), 0, 1, this._baseCanvas.height);
     this._drawLayers();
-    this._layers.playhead.requestId = requestAnimationFrame(this._drawPayhead.bind(this));
+    this._layers.playhead.requestId = requestAnimationFrame(this._drawPlayhead.bind(this));
   }
 
   _getXPositionOfPlayhead() {
-    var channelDataIndex = this._audio.context.currentTime * this._audio.buffer.sampleRate;
+    var channelDataIndex = this._audio.element.currentTime * this._audio.buffer.sampleRate;
     return Math.floor(channelDataIndex / this._FFT_SIZE);
   }
 

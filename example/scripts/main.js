@@ -3,12 +3,8 @@ import {Spectrogram} from '../../spectrogram.js';
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
 let audioContext;
-let source;
 let spectro;
-let songButton;
-let drawButton;
-let songSelect;
-let selectedMedia;
+let drawnAudioURI;
 
 function init() {
   try {
@@ -49,28 +45,26 @@ function init() {
     }
 
     button.addEventListener('click', drawSong.bind(null, audio.src));
+    audio.addEventListener('play', event => {
+      if (event.target.src !== drawnAudioURI) {
+        return;
+      }
+
+      spectro.drawPlayhead(event.target);
+    });
+    audio.addEventListener('pause', event => {
+      if (event.target.src !== drawnAudioURI) {
+        return;
+      }
+
+      spectro.stopDrawingPlayhead();
+    });
   })
 }
 
-function playSong() {
-  if (songButton.textContent !== "Stop song") {
-    songButton.textContent = "Stop song";
-    fetchMedia(function playSong(songBuffer) {
-      source = audioContext.createBufferSource();
-      source.buffer = songBuffer;
-      source.connect(audioContext.destination);
-      source.start();
-      spectro.drawPlayhead();
-    })
-  } else {
-    songButton.textContent = "Play song";
-    source.stop()
-    spectro.stopDrawingPlayhead();
-  }
-}
-
 async function drawSong(audioURI) {
-  const songBuffer = await fetchMedia(audioURI);
+  drawnAudioURI = audioURI;
+  const songBuffer = await fetchMedia(drawnAudioURI);
   spectro.clear();
   spectro.draw(songBuffer);
 }
