@@ -4,9 +4,8 @@
  *                 https://github.com/katspaugh/wavesurfer.js/blob/d6d4638eba7a2c08c3415d24f22259893519d604/src/plugin/spectrogram.js#L228
  */
 export class FFT {
-  constructor(buffer) {
+  constructor() {
     let i;
-    this.buffer = buffer;
     this.bufferSize = 1024;
 
     this.sinTable = new Float32Array(this.bufferSize);
@@ -64,10 +63,7 @@ export class FFT {
       throw 'Invalid buffer size, must be a power of 2.';
     }
     if (bufferSize !== segment.length) {
-      throw 'Supplied segment is not the same size as defined FFT. FFT Size: ' +
-      bufferSize +
-      ' Buffer Size: ' +
-      this.buffer.length;
+      throw 'Supplied segment is not the same size as defined FFT. FFT Size: ' + bufferSize;
     }
 
     let halfSize = 1,

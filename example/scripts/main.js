@@ -13,7 +13,7 @@ function init() {
     alert('No web audio support in this browser!');
   }
 
-  spectro = new Spectrogram(document.getElementById('canvas'), audioContext, {
+  spectro = new Spectrogram(document.getElementById('canvas'), {
     canvas: {
       width: function () {
         return window.innerWidth;
