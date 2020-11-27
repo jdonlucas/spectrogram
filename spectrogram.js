@@ -29,6 +29,7 @@ export class Spectrogram {
 
     this._audio = {};
     this._FFT_SIZE = 1024;
+    this._freqData = [];
   }
 
   draw(audioBuffer) {
@@ -43,7 +44,8 @@ export class Spectrogram {
     this._layers.spectro.fillStyle = this._getColor(0);
     this._layers.spectro.fillRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
 
-    this._draw(audioBuffer.getChannelData(0));
+    this._analyzeFrequenciesOverTime(audioBuffer.getChannelData(0));
+    this._draw();
   };
 
   drawPlayhead(audioElement) {
@@ -66,32 +68,38 @@ export class Spectrogram {
     canvasContext.clearRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
   };
 
-  _draw(channelData) {
-    var fft = new FFT();
-    var currentOffset = 0;
-    var width = this._baseCanvas.width;
-    var height = this._baseCanvas.height;
+  _analyzeFrequenciesOverTime(channelData) {
+    const fft = new FFT();
+    const width = this._baseCanvas.width;
+    let currentOffset = 0;
     while (currentOffset + this._FFT_SIZE < channelData.length) {
-      var segment = channelData.slice(
+      const segment = channelData.slice(
         currentOffset,
         currentOffset + this._FFT_SIZE
       );
-      var spectrum = fft.calculateSpectrum(segment);
-      var array = new Uint8Array(this._FFT_SIZE / 2);
-      for (var j = 0; j < this._FFT_SIZE / 2; j++) {
+      const spectrum = fft.calculateSpectrum(segment);
+      const array = new Uint8Array(this._FFT_SIZE / 2);
+      for (let j = 0; j < this._FFT_SIZE / 2; j++) {
         array[j] = Math.max(-255, (Math.log(spectrum[j]) * Math.LOG10E) * 45);
       }
-      var segmentNumber = (currentOffset + this._FFT_SIZE) / this._FFT_SIZE;
+      const segmentNumber = (currentOffset + this._FFT_SIZE) / this._FFT_SIZE;
+      this._freqData[segmentNumber] = array;
       if (segmentNumber > width) {
         break;
       }
-      for (var frequencyNumber = 0; frequencyNumber < array.length; frequencyNumber++) {
-        var value = array[frequencyNumber];
-        this._layers.spectro.fillStyle = this._getColor(value);
-        this._layers.spectro.fillRect(segmentNumber, height - frequencyNumber, 1, 1);
-      }
+
       currentOffset += this._FFT_SIZE;
     }
+  }
+
+  _draw() {
+    this._freqData.forEach((frequencyEnergies, time) => {
+      const height = this._baseCanvas.height;
+      frequencyEnergies.forEach((frequencyEnergy, frequencyNumber) => {
+        this._layers.spectro.fillStyle = this._getColor(frequencyEnergy);
+        this._layers.spectro.fillRect(time, height - frequencyNumber, 1, 1);
+      })
+    })
     this._drawLayers();
   };
 
