@@ -1,12 +1,39 @@
+
+onmessage = function analyzeFrequenciesOverTime({data: {width, channelDataBuffer, fftSize}}) {
+  const channelData = new Float32Array(channelDataBuffer);
+  const fft = new FFT(fftSize);
+  const freqData = []
+  let currentOffset = 0;
+  while (currentOffset + fftSize < channelData.length) {
+    const segment = channelData.slice(
+      currentOffset,
+      currentOffset + fftSize
+    );
+    const spectrum = fft.calculateSpectrum(segment);
+    const array = new Uint8Array(fftSize / 2);
+    for (let j = 0; j < fftSize / 2; j++) {
+      array[j] = Math.max(-255, (Math.log(spectrum[j]) * Math.LOG10E) * 45);
+    }
+    const segmentNumber = (currentOffset + fftSize) / fftSize;
+    freqData[segmentNumber] = array;
+    if (segmentNumber > width) {
+      break;
+    }
+
+    currentOffset += fftSize;
+  }
+  postMessage(freqData);
+}
+
 /**
  * Calculate FFT - Based on https://github.com/katspaugh/wavesurfer.js/blob/d6d4638eba7a2c08c3415d24f22259893519d604/src/plugin/FFT.js#L2
  *                 but whittled down to just use Hann window function, which is the default for wavesurfer:
  *                 https://github.com/katspaugh/wavesurfer.js/blob/d6d4638eba7a2c08c3415d24f22259893519d604/src/plugin/spectrogram.js#L228
  */
-export class FFT {
-  constructor() {
+class FFT {
+  constructor(fftSize) {
     let i;
-    this.bufferSize = 1024;
+    this.bufferSize = fftSize;
 
     this.sinTable = new Float32Array(this.bufferSize);
     this.cosTable = new Float32Array(this.bufferSize);

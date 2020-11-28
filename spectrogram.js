@@ -1,5 +1,3 @@
-import {FFT} from './FFT.js';
-
 function _isFunction(v) {
   return typeof v === 'function';
 }
@@ -29,7 +27,7 @@ export class Spectrogram {
 
     this._audio = {};
     this._FFT_SIZE = 1024;
-    this._freqData = [];
+    this._analyzerWorker = new Worker('../FFT.js');
   }
 
   draw(audioBuffer) {
@@ -44,8 +42,13 @@ export class Spectrogram {
     this._layers.spectro.fillStyle = this._getColor(0);
     this._layers.spectro.fillRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
 
-    this._analyzeFrequenciesOverTime(audioBuffer.getChannelData(0));
-    this._draw();
+    const channelDataBuffer = audioBuffer.getChannelData(0).buffer;
+    this._analyzerWorker.postMessage({
+      width:  this._baseCanvas.width,
+      channelDataBuffer,
+      fftSize: this._FFT_SIZE
+    }, [channelDataBuffer])
+    this._analyzerWorker.onmessage = this._draw.bind(this);
   };
 
   drawPlayhead(audioElement) {
@@ -68,32 +71,8 @@ export class Spectrogram {
     canvasContext.clearRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
   };
 
-  _analyzeFrequenciesOverTime(channelData) {
-    const fft = new FFT();
-    const width = this._baseCanvas.width;
-    let currentOffset = 0;
-    while (currentOffset + this._FFT_SIZE < channelData.length) {
-      const segment = channelData.slice(
-        currentOffset,
-        currentOffset + this._FFT_SIZE
-      );
-      const spectrum = fft.calculateSpectrum(segment);
-      const array = new Uint8Array(this._FFT_SIZE / 2);
-      for (let j = 0; j < this._FFT_SIZE / 2; j++) {
-        array[j] = Math.max(-255, (Math.log(spectrum[j]) * Math.LOG10E) * 45);
-      }
-      const segmentNumber = (currentOffset + this._FFT_SIZE) / this._FFT_SIZE;
-      this._freqData[segmentNumber] = array;
-      if (segmentNumber > width) {
-        break;
-      }
-
-      currentOffset += this._FFT_SIZE;
-    }
-  }
-
-  _draw() {
-    this._freqData.forEach((frequencyEnergies, time) => {
+  _draw({data: freqData}) {
+    freqData.forEach((frequencyEnergies, time) => {
       const height = this._baseCanvas.height;
       frequencyEnergies.forEach((frequencyEnergy, frequencyNumber) => {
         this._layers.spectro.fillStyle = this._getColor(frequencyEnergy);
