@@ -14,7 +14,7 @@ onmessage = function analyzeFrequenciesOverTime({data: {width, channelDataBuffer
     for (let j = 0; j < fftSize / 2; j++) {
       array[j] = Math.max(-255, (Math.log(spectrum[j]) * Math.LOG10E) * 45);
     }
-    const segmentNumber = (currentOffset + fftSize) / fftSize;
+    const segmentNumber = ((currentOffset + fftSize) / fftSize) - 1;
     freqData[segmentNumber] = array;
     if (segmentNumber > width) {
       break;

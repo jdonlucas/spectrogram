@@ -31,7 +31,7 @@ function init() {
 
       for (let i = 0; i < steps; ++i) {
         const color = scale(i);
-        colors.push(color.hex());
+        colors.push(color._rgb);
       }
 
       return colors;

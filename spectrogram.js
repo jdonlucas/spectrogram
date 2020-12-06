@@ -72,13 +72,19 @@ export class Spectrogram {
   };
 
   _draw({data: freqData}) {
+    const imageData = this._layers.spectro.createImageData(freqData.length, freqData[0].length);
     freqData.forEach((frequencyEnergies, time) => {
-      const height = this._baseCanvas.height;
       frequencyEnergies.forEach((frequencyEnergy, frequencyNumber) => {
-        this._layers.spectro.fillStyle = this._getColor(frequencyEnergy);
-        this._layers.spectro.fillRect(time, height - frequencyNumber, 1, 1);
+        const y = imageData.height - 1 - frequencyNumber;
+        const redIndex = y * (imageData.width * 4) + time * 4;
+        const color = this._getColor(frequencyEnergy);
+        imageData.data[redIndex] = color[0];
+        imageData.data[redIndex + 1] = color[1];
+        imageData.data[redIndex + 2] = color[2];
+        imageData.data[redIndex + 3] = 255;
       })
-    })
+    });
+    this._layers.spectro.putImageData(imageData, 0, 0);
     this._drawLayers();
   };
 
@@ -117,14 +123,10 @@ export class Spectrogram {
     var slice = (Math.PI / 2) * 3.1;
     var colors = [];
 
-    function toRGBString(v) {
-      return 'rgba(' + [v, v, v, 1].toString() + ')';
-    }
-
     for (var i = 0; i < steps; i++) {
       var v = (Math.sin((frequency * i) + slice) * amplitude + center) >> 0;
 
-      colors.push(toRGBString(v));
+      colors.push([v, v, v, 1]);
     }
 
     return colors;
