@@ -1,5 +1,5 @@
 
-onmessage = function analyzeFrequenciesOverTime({data: {width, channelDataBuffer, fftSize}}) {
+onmessage = function analyzeFrequenciesOverTime({data: {channelDataBuffer, fftSize}}) {
   const channelData = new Float32Array(channelDataBuffer);
   const fft = new FFT(fftSize);
   const freqData = []
@@ -16,9 +16,6 @@ onmessage = function analyzeFrequenciesOverTime({data: {width, channelDataBuffer
     }
     const segmentNumber = ((currentOffset + fftSize) / fftSize) - 1;
     freqData[segmentNumber] = array;
-    if (segmentNumber > width) {
-      break;
-    }
 
     currentOffset += fftSize;
   }

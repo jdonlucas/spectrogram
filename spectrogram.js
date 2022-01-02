@@ -36,15 +36,8 @@ export class Spectrogram {
     }
 
     this._sampleRate = audioBuffer.sampleRate;
-    this._layers.spectro = this._layers.spectro || this._initializeLayer();
-    this._layers.drawOrder[0] = this._layers.spectro;
-    this.clear(this._layers.spectro);
-    this._layers.spectro.fillStyle = this._getColor(0);
-    this._layers.spectro.fillRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
-
     const channelDataBuffer = audioBuffer.getChannelData(0).buffer;
     this._analyzerWorker.postMessage({
-      width:  this._baseCanvas.width,
       channelDataBuffer,
       fftSize: this._FFT_SIZE
     }, [channelDataBuffer])
@@ -68,10 +61,19 @@ export class Spectrogram {
 
   clear(canvasContext) {
     canvasContext = canvasContext || this._baseCanvasContext;
-    canvasContext.clearRect(0, 0, this._baseCanvas.width, this._baseCanvas.height);
+    canvasContext.clearRect(0, 0, this._width, this._baseCanvas.height);
   };
 
   _draw({data: freqData}) {
+    this._width = freqData.length;
+    this._layers.spectro = this._initializeLayer();
+    this._layers.drawOrder[0] = this._layers.spectro;
+    this.clear(this._layers.spectro);
+    this._layers.spectro.fillStyle = this._getColor(0);
+    this._layers.spectro.fillRect(0, 0, this._width, this._baseCanvas.height);
+
+    //TODO: to remove. For now it tests that the face appears at the end of the aphex twin song
+    // this._baseCanvasContext.translate(-14600, 0);
     const imageData = this._layers.spectro.createImageData(freqData.length, freqData[0].length);
     freqData.forEach((frequencyEnergies, time) => {
       frequencyEnergies.forEach((frequencyEnergy, frequencyNumber) => {
@@ -103,16 +105,15 @@ export class Spectrogram {
 
   _initializeLayer() {
     var canvas = document.createElement('canvas');
-    canvas.width = this._baseCanvas.width;
+    canvas.width = this._width;
     canvas.height = this._baseCanvas.height;
     return canvas.getContext('2d');
   };
 
   _drawLayers() {
     var baseCanvasContext = this._baseCanvasContext;
-    var baseCanvas = this._baseCanvas;
-    this._layers.drawOrder.forEach(function (layer) {
-      baseCanvasContext.drawImage(layer.canvas, 0, 0, baseCanvas.width, baseCanvas.height);
+    this._layers.drawOrder.forEach(function drawImage(layer) {
+      baseCanvasContext.drawImage(layer.canvas, 0, 0);
     })
   };
 
