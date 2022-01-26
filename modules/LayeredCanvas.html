@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LayeredCanvas</title>
+    <script type="module">
+        import {LayeredCanvas} from './LayeredCanvas.js';
+
+        const layeredCanvas = new LayeredCanvas(document.querySelector('canvas'), {
+            width: function () {
+                return window.innerWidth;
+            },
+            height: 500
+        });
+        const centerOfCanvas = layeredCanvas.getCanvasHeight() / 2;
+        const moveAmount = 5;
+
+        const squareContext = layeredCanvas.registerLayer(0);
+        const leftmostPosition = 25;
+        const square = {
+            widthAndHeight: 100,
+            y: centerOfCanvas - 50,
+            x: leftmostPosition,
+            isMovingRight: true
+        };
+        squareContext.fillStyle = 'lightpink';
+
+        const rectangleContext = layeredCanvas.registerLayer(1);
+        const rightmostPosition = layeredCanvas.getCanvasWidth() - 250;
+        const rectangle = {
+            width: 200,
+            height: 100,
+            y: centerOfCanvas - 50,
+            x: rightmostPosition,
+            isMovingRight: false
+        };
+        rectangleContext.fillStyle = 'lightskyblue';
+
+        requestAnimationFrame(drawFrame);
+
+        function drawFrame() {
+            layeredCanvas.clear();
+            squareContext.fillRect(square.x, square.y, square.widthAndHeight, square.widthAndHeight);
+            rectangleContext.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+            layeredCanvas.drawLayers();
+            moveObject(square);
+            moveObject(rectangle);
+            requestAnimationFrame(drawFrame);
+        }
+
+        function moveObject(object) {
+            let amountMoved = moveAmount * (object.isMovingRight ? 1 : -1);
+            if (object.x < leftmostPosition || object.x > rightmostPosition) {
+                object.isMovingRight = !object.isMovingRight;
+                amountMoved *= -1;
+            }
+            object.x += amountMoved;
+        }
+    </script>
+</head>
+<body>
+<canvas></canvas>
+</body>
+</html>
