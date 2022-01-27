@@ -6,12 +6,7 @@
     <script type="module">
         import {LayeredCanvas} from './LayeredCanvas.js';
 
-        const layeredCanvas = new LayeredCanvas(document.querySelector('canvas'), {
-            width: function () {
-                return window.innerWidth;
-            },
-            height: 500
-        });
+        const layeredCanvas = new LayeredCanvas(document.querySelector('canvas'));
         const centerOfCanvas = layeredCanvas.getCanvasHeight() / 2;
         const moveAmount = 5;
 
@@ -59,6 +54,6 @@
     </script>
 </head>
 <body>
-<canvas></canvas>
+<canvas width="1000" height="500"></canvas>
 </body>
 </html>

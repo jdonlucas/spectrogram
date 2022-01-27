@@ -1,5 +1,3 @@
-import {Utils} from './Utils.js';
-
 export class LayeredCanvas {
 
 	/**
@@ -20,13 +18,10 @@ export class LayeredCanvas {
 	/**
 	 * Constructs an object that takes a bunch of offscreen canvases and then draws them in layers.
 	 * @param {HTMLCanvasElement} canvas
-	 * @param options
 	 */
-	constructor(canvas, options) {
+	constructor(canvas) {
 		this.#baseCanvas = canvas;
 		this.#baseCanvasContext = this.#baseCanvas.getContext('2d');
-		this.#baseCanvas.width = Utils._result(options.width) || this.#baseCanvas.width;
-		this.#baseCanvas.height = Utils._result(options.height) || this.#baseCanvas.height;
 	}
 
 	getCanvasHeight() {
