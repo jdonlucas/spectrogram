@@ -23,7 +23,7 @@ onmessage = function analyzeFrequenciesOverTime({data: {channelDataBuffer, fftSi
 }
 
 /**
- * Calculate FFT - Based on https://github.com/katspaugh/wavesurfer.js/blob/d6d4638eba7a2c08c3415d24f22259893519d604/src/plugin/FFT.js#L2
+ * Calculate FFT - Based on https://github.com/katspaugh/wavesurfer.js/blob/5.2.0/src/plugin/spectrogram/fft.js
  *                 but whittled down to just use Hann window function, which is the default for wavesurfer:
  *                 https://github.com/katspaugh/wavesurfer.js/blob/d6d4638eba7a2c08c3415d24f22259893519d604/src/plugin/spectrogram.js#L228
  */
