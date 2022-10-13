@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BufferedAudioData</title>
+    <script type="module">
+        import {BufferedAudioData} from './BufferedAudioData.js';
+
+        const bufferedAudioData = new BufferedAudioData(document.querySelector('audio').src);
+        (async () => {
+            await bufferedAudioData.fetchData();
+            const buffer = bufferedAudioData.getPCMData();
+            const pre = document.querySelector('pre');
+            pre.textContent += 'Random samples from the PCM: ';
+            for (let i = 0; i < 5; i++) {
+                pre.textContent += buffer[Math.round(Math.random() * buffer.length - 1)] + ', ';
+            }
+            const freqData = await bufferedAudioData.getFreqData();
+            pre.textContent += '\nRandom samples from the frequency data: ';
+            for (let i = 0; i < 5; i++) {
+                pre.textContent += freqData[Math.round(Math.random() * freqData.length - 1)]
+                    [Math.round(Math.random() * (BufferedAudioData.FFT_SIZE / 2) - 1)] + ', ';
+            }
+        })();
+    </script>
+</head>
+<body>
+<h2>Wavesurfer Demo</h2>
+<audio src="../example/media/demo.wav" controls></audio>
+<pre></pre>
+</body>
+</html>
