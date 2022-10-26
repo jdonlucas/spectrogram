@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Playhead</title>
+    <script type="module">
+        import {Playhead} from './Playhead.js';
+        import {LayeredCanvas} from './LayeredCanvas.js';
+        import {BufferedAudioData} from './BufferedAudioData.js';
+
+        (async () => {
+            const layeredCanvas = new LayeredCanvas(document.querySelector('canvas'));
+            const audioElement = document.querySelector('audio');
+            const bufferedAudioData = new BufferedAudioData(audioElement.src);
+            await bufferedAudioData.fetchData();
+            const background = layeredCanvas.registerLayer(0);
+            new Playhead(layeredCanvas, audioElement, bufferedAudioData);
+            background.fillStyle = 'black';
+            background.fillRect(0, 0, layeredCanvas.getCanvasWidth(), layeredCanvas.getCanvasHeight());
+            layeredCanvas.drawLayers();
+        })();
+    </script>
+</head>
+<body>
+<canvas width="1000" height="500"></canvas>
+<h2>Wavesurfer Demo</h2>
+<audio src="../example/media/demo.wav" controls></audio>
+</body>
+</html>

@@ -42,6 +42,13 @@ export class LayeredCanvas {
 		this.#baseCanvasContext.clearRect(0, 0, this.#baseCanvas.width, this.#baseCanvas.height);
 	};
 
+	/**
+	 * @param {CanvasRenderingContext2D} layer
+	 */
+	clearLayer(layer) {
+		layer.clearRect(0, 0, this.getCanvasWidth(), this.getCanvasHeight())
+	}
+
 	#initializeLayer() {
 		const canvas = document.createElement('canvas');
 		canvas.width = this.#baseCanvas.width;

@@ -49,7 +49,7 @@ export class BufferedAudioData {
 	 * {@link AudioBuffer.prototype.sampleRate}
 	 * @returns {number}
 	 */
-	get sampleRate() {
+	getSampleRate() {
 		return this.#buffer.sampleRate;
 	}
 
