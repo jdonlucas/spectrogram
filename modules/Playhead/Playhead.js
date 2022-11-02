@@ -1,4 +1,4 @@
-import {BufferedAudioData} from './BufferedAudioData.js';
+import {BufferedAudioData} from '../BufferedAudioData/BufferedAudioData.js';
 
 export class Playhead {
 

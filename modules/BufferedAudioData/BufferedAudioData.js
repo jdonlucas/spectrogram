@@ -1,4 +1,4 @@
-import {PromisedWorker} from './PromisedWorker.js';
+import {PromisedWorker} from '../PromisedWorker/PromisedWorker.js';
 
 export class BufferedAudioData {
 
@@ -56,7 +56,7 @@ export class BufferedAudioData {
 	async getFreqData() {
 		if (!this.#frequencyData) {
 			const channelDataBuffer = this.getPCMData(0).buffer;
-			const {data} = await (new PromisedWorker('../FFT.js')).postMessage({
+			const {data} = await (new PromisedWorker('../../FFT.js')).postMessage({
 				channelDataBuffer,
 				fftSize: BufferedAudioData.FFT_SIZE
 			}, [channelDataBuffer]);

@@ -5,8 +5,8 @@
     <title>Playhead</title>
     <script type="module">
         import {Playhead} from './Playhead.js';
-        import {LayeredCanvas} from './LayeredCanvas.js';
-        import {BufferedAudioData} from './BufferedAudioData.js';
+        import {LayeredCanvas} from '../LayeredCanvas/LayeredCanvas.js';
+        import {BufferedAudioData} from '../BufferedAudioData/BufferedAudioData.js';
 
         (async () => {
             const layeredCanvas = new LayeredCanvas(document.querySelector('canvas'));
@@ -24,6 +24,6 @@
 <body>
 <canvas width="1000" height="500"></canvas>
 <h2>Wavesurfer Demo</h2>
-<audio src="../example/media/demo.wav" controls></audio>
+<audio src="../../example/media/demo.wav" controls></audio>
 </body>
 </html>
