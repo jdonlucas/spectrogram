@@ -27,7 +27,7 @@ export class Spectrogram {
 
     this._audio = {};
     this._FFT_SIZE = 1024;
-    this._analyzerWorker = new Worker('../FFT.js');
+    this._analyzerWorker = new Worker('./FFT.js');
   }
 
   draw(audioBuffer) {
